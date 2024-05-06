@@ -20,12 +20,12 @@ const CollectionFilterChips = ({
     ) || []
 
   const isOpen = useMemo(
-    () => (filtersTotal > 0 ? true : false),
+    () => (filtersTotal > 0),
     [filtersTotal]
   )
 
   return (
-    <div className="collection--filter-chips is-inverted">
+    <div className="category--filter-chips is-inverted">
       <Accordion id={id} isOpen={isOpen} isControlled>
         <div className="chip-group">
           <ul className="chip-group--list">
@@ -73,4 +73,4 @@ const CollectionFilterChips = ({
   )
 }
 
-export default CollectionFilterChips
+export default CategoryFilterChips

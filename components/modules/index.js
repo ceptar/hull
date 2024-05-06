@@ -1,35 +1,43 @@
 import React from 'react'
+import dynamic from 'next/dynamic'
 
-import Grid from './grid'
-import Hero from './hero'
-import Marquee from './marquee'
-import DividerPhoto from './divider-photo'
-import ProductHero from './product-hero'
-import Collection from './collection-grid'
+const Grid = dynamic(() => import('./grid'))
+const Hero = dynamic(() => import('./hero'))
+const Marquee = dynamic(() => import('./marquee'))
+const DividerPhoto = dynamic(() => import('./divider-photo'))
 
+/**
+ * Module that can be added to a page document
+ *
+ * @returns {React.Component}
+ */
 export const Module = ({
   index,
-  data,
+  module,
   product,
   activeVariant,
   onVariantChange,
+  categoryProducts,
 }) => {
-  const ModuleType = {
-    grid: Grid,
-    hero: Hero,
-    marquee: Marquee,
-    dividerPhoto: DividerPhoto,
-    productHero: ProductHero,
-    collectionGrid: Collection,
-  }[data?._type] ?? <></>
+  const type = module._type
 
-  return (
-    <ModuleType
-      index={index}
-      data={data}
-      product={product}
-      activeVariant={activeVariant}
-      onVariantChange={onVariantChange}
-    />
-  )
+  switch (type) {
+    case 'grid':
+      return <Grid index={index} data={module} />
+    case 'hero':
+      return <Hero index={index} data={module} />
+    case 'marquee':
+      return <Marquee index={index} data={module} />
+    case 'dividerPhoto':
+      return <DividerPhoto index={index} data={module} />
+    case 'categoryGrid':
+      return (
+        <Category
+          index={index}
+          data={{ ...module, products: categoryProducts }}
+        />
+      )
+    default:
+      return null
+  }
 }

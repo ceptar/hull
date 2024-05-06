@@ -10,14 +10,17 @@ export default {
   icon: () => <Gear />,
   fields: [
     {
-      title: 'Which option is this for?',
+      title: 'Wich option is this for?',
       name: 'forOption',
       type: 'string',
       options: {
         list: [{ title: 'All', value: '' }],
-        from: 'options',
-        fromData: { title: 'name' },
-        joinWith: 'values'
+        fromField: 'groups',
+        fromSubField: 'options',
+        fromFieldData: {
+          title: 'name',
+          value: 'position'
+        }
       }
     },
     {

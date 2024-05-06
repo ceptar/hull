@@ -1,11 +1,11 @@
 import React from 'react'
 
-import { getCollection, getAllDocSlugs } from '@data'
+import { getCategory, getAllDocSlugs } from '@data'
 
 import Layout from '@components/layout'
 import { Module } from '@components/modules'
 
-const CollectionPage = ({ data }) => {
+const CategoryPage = ({ data }) => {
   const { site, page } = data
 
   return (
@@ -14,7 +14,8 @@ const CollectionPage = ({ data }) => {
         <Module
           key={key}
           index={key}
-          data={{ ...module, products: page.products }}
+          module={module}
+          collectionProducts={page.products}
         />
       ))}
     </Layout>
@@ -22,7 +23,7 @@ const CollectionPage = ({ data }) => {
 }
 
 export async function getStaticProps({ params, preview, previewData }) {
-  const collectionData = await getCollection(params.slug, {
+  const collectionData = await getCategory(params.slug, {
     active: preview,
     token: previewData?.token,
   })
@@ -35,11 +36,11 @@ export async function getStaticProps({ params, preview, previewData }) {
 }
 
 export async function getStaticPaths() {
-  const allCollections = await getAllDocSlugs('collection')
+  const allCategorys = await getAllDocSlugs('collection')
 
   return {
     paths:
-      allCollections?.map((collection) => {
+      allCategorys?.map((collection) => {
         return {
           params: {
             slug: collection.slug,
@@ -50,4 +51,4 @@ export async function getStaticPaths() {
   }
 }
 
-export default CollectionPage
+export default CategoryPage

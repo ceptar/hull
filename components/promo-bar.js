@@ -1,39 +1,302 @@
-import React from 'react'
-import { useRouter } from 'next/router'
+import React, { useState, useRef, useMemo, useCallback, useEffect } from 'react'
+import cx from 'classnames'
 
-import { ConditionalWrapper } from '@lib/helpers'
+import {
+  useParams,
+  usePrevious,
+  cartesian,
+  sortAsc,
+  sortDesc,
+  clampRange,
+} from '@lib/helpers'
 
-import CustomLink from '@components/link'
+import { useSiteContext } from '@lib/context'
 
-const PromoBar = React.memo(({ data = {} }) => {
-  const { enabled, display, text, link } = data
-  const router = useRouter()
+import CategoryFilter from '@components/category-filter'
+import CategoryFilterChips from '@components/category-filter-chips'
+import CategorySort from '@components/category-sort'
+import ProductCard from '@components/product-card'
+import BlockContent from '@components/block-content'
 
-  // bail if no display or text
-  if (!enabled || !display || !display.trim() || !text) return null
+const Category = ({ data = {} }) => {
+  const { title, products, filter, sort, paginationLimit, noFilterResults } =
+    data
 
-  // bail if display set to homepage and we're not on the homepage
-  if (display === 'home' && router.asPath !== '/') return null
+  if (!products || products.length === 0) return null
+
+  const { isPageTransition } = useSiteContext()
+
+  const categoryItems = useRef([])
+
+  const [hasPagination, setHasPagination] = useState(
+    paginationLimit > 0 && products.length > paginationLimit
+  )
+  const [currentCount, setCurrentCount] = useState(
+    hasPagination ? paginationLimit : products.length
+  )
+
+  const filterGroups = filter.groups
+
+  const [currentParams, setCurrentParams] = useParams([
+    {
+      name: 'page',
+      value: null,
+    },
+    {
+      name: 'sort',
+      value: sort?.options[0]?.slug,
+    },
+    ...filterGroups.map((g) => ({
+      name: g.slug,
+      value: null,
+    })),
+  ])
+  const previousParams = usePrevious(currentParams)
+
+  // determine which params set to use
+  const activeParams =
+    isPageTransition && previousParams ? previousParams : currentParams
+
+  // calculate our sort
+  const activeSort = activeParams.find((filter) => filter.name === 'sort').value
+
+  // calculate our filters
+  const currentFilters = activeParams.filter(
+    (f) => !['page', 'sort'].includes(f.name)
+  )
+  const activeFilters = currentFilters.map((filter) => {
+    const validOptions = filterGroups
+      .find((g) => g.slug === filter.name)
+      ?.options.map((o) => o.slug)
+
+    const currentOptions = Array.isArray(filter.value)
+      ? filter.value
+      : filter.value?.split(',') || []
+
+    return {
+      name: filter.name,
+      values: [
+        ...new Set(
+          currentOptions
+            .filter(Boolean)
+            .filter((f) => validOptions?.includes(f))
+        ),
+      ],
+    }
+  })
+
+  // calculate total active filters
+  const filtersTotal = activeFilters.reduce((acc, cur) => {
+    return Number(acc + cur.values.length)
+  }, 0)
+
+  // calculate our product order and pagination
+  const orderedProducts = useFilterAndSort(products, activeFilters, activeSort)
+  const paginatedProducts = [...orderedProducts.slice(0, currentCount)]
+
+  // handle filter + sort updates
+  const updateParams = useCallback(
+    (params) => {
+      const newFilters = activeParams.map((filter) => {
+        const matchedParam = params?.find((p) => p.name === filter.name)
+
+        return matchedParam ? { ...filter, value: matchedParam?.value } : filter
+      })
+
+      setCurrentParams(newFilters)
+    },
+    [activeParams]
+  )
+
+  // handle load more
+  const loadMore = useCallback(() => {
+    const newCount = clampRange(
+      currentCount + paginationLimit,
+      1,
+      orderedProducts.length
+    )
+
+    const newPage = Math.ceil(newCount / paginationLimit)
+
+    setCurrentCount(newCount)
+    updateParams([{ name: 'page', value: newPage > 1 ? `${newPage}` : null }])
+  }, [currentCount, orderedProducts, paginationLimit])
+
+  // update pagination when the count or products change
+  useEffect(() => {
+    const desiredPage = activeParams.find((p) => p.name === 'page').value
+    const maxPage = Math.ceil(orderedProducts.length / paginationLimit)
+
+    const newCount =
+      desiredPage > 1 && desiredPage <= maxPage
+        ? clampRange(paginationLimit * desiredPage, 1, orderedProducts.length)
+        : null
+
+    const pageProductIndex =
+      newCount < orderedProducts?.length
+        ? newCount - paginationLimit
+        : orderedProducts.length - 1
+
+    if (newCount) {
+      setCurrentCount(newCount)
+      categoryItems.current[pageProductIndex]?.querySelector('[href]').focus({
+        preventScroll: true,
+      })
+    }
+
+    setHasPagination(currentCount < orderedProducts.length)
+  }, [
+    currentCount,
+    orderedProducts,
+    activeParams,
+    paginationLimit,
+    categoryItems,
+  ])
 
   return (
-    <div className="promo-bar is-inverted">
-      <div className="promo-bar--content">
-        <ConditionalWrapper
-          condition={link}
-          wrapper={(children) => (
-            <CustomLink
-              className="promo-bar--link"
-              link={{ ...{ page: link } }}
-            >
-              {children}
-            </CustomLink>
-          )}
-        >
-          {text}
-        </ConditionalWrapper>
-      </div>
-    </div>
-  )
-})
+    <section className="category">
+      <div className="category--tools">
+        {filter?.isActive && (
+          <CategoryFilter
+            filterGroups={filterGroups}
+            activeFilters={activeFilters}
+            filtersTotal={filtersTotal}
+            itemTotal={orderedProducts.length}
+            onChange={updateParams}
+          />
+        )}
 
-export default PromoBar
+        {sort?.isActive && (
+          <CategorySort
+            sortOptions={sort.options}
+            activeSort={activeSort}
+            onChange={updateParams}
+          />
+        )}
+      </div>
+
+      {filter?.isActive && (
+        <CategoryFilterChips
+          id="category-filter-chips"
+          filterGroups={filterGroups}
+          activeFilters={activeFilters}
+          filtersTotal={filtersTotal}
+          onClick={updateParams}
+        />
+      )}
+
+      <div className="category--content">
+        <div
+          className={cx('category--grid', {
+            'is-empty': !orderedProducts.length,
+          })}
+        >
+          {paginatedProducts.map((product, key) => (
+            <ProductCard
+              ref={(node) => (categoryItems.current[key] = node)}
+              key={
+                product.id +
+                activeParams
+                  .filter((f) => f.name !== 'page')
+                  .map((f) => f.value)
+                  .filter(Boolean)
+                  .join('-')
+              }
+              product={product}
+              activeFilters={activeFilters}
+              hasVisuals={product.photos.main || product.photos.listing}
+              showGallery={product.photos.main && product.useGallery === 'true'}
+              showThumbs={
+                product.photos.listing && product.useGallery === 'false'
+              }
+              showOption={product.surfaceOption}
+              showPrice
+              showQuickAdd
+            />
+          ))}
+
+          {orderedProducts.length === 0 && (
+            <div className="category--empty">
+              {noFilterResults && <BlockContent blocks={noFilterResults} />}
+              <button
+                className="filters-reset btn is-large"
+                onClick={() =>
+                  updateParams(
+                    activeFilters.map((filter) => ({
+                      name: filter.name,
+                      value: null,
+                    }))
+                  )
+                }
+              >
+                Clear Filters
+              </button>
+            </div>
+          )}
+        </div>
+
+        {hasPagination && (
+          <div className="category--pagination">
+            <button className="btn is-large" onClick={loadMore}>
+              Load More
+              <span className="sr-only">
+                {' '}
+                products from the "{title}" category
+              </span>
+            </button>
+          </div>
+        )}
+
+        {orderedProducts?.length > 0 && (
+          <div className="category--count">
+            <p aria-live="polite" role="status" aria-atomic="true">
+              Showing {paginatedProducts.length} of {orderedProducts.length}{' '}
+              products
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}
+
+const useFilterAndSort = (products, filters, sort) => {
+  const filterCombos = useMemo(
+    () =>
+      cartesian(...filters.filter((f) => f.values.length).map((f) => f.values)),
+    [filters]
+  )
+
+  const filteredProducts = useMemo(
+    () =>
+      products.filter((product) => {
+        return filterCombos.some((combo) => {
+          const productFilters = product.filters?.map((f) => f.slug)
+          const hasCombo = combo.every((x) => productFilters?.includes(x))
+
+          return hasCombo
+        })
+      }),
+    [filters]
+  )
+
+  switch (sort) {
+    case 'priceAsc':
+      return sortAsc(filteredProducts, 'price')
+    case 'priceDesc':
+      return sortDesc(filteredProducts, 'price')
+    case 'alphaAsc':
+      return sortAsc(filteredProducts, 'title')
+    case 'alphaDesc':
+      return sortDesc(filteredProducts, 'title')
+    case 'dateAsc':
+      return sortAsc(filteredProducts, 'publishDate')
+    case 'dateDesc':
+      return sortDesc(filteredProducts, 'publishDate')
+    case 'featured':
+    default:
+      return filteredProducts
+  }
+}
+
+export default Category

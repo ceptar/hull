@@ -1,3 +1,5 @@
+// import '../../branding/skin.css?raw'
+
 import {
   Header1,
   Header2,
@@ -109,7 +111,7 @@ export default {
                 type: 'reference',
                 to: [
                   { type: 'page' },
-                  { type: 'collection' },
+                  { type: 'category' },
                   { type: 'product' }
                 ],
                 hidden: ({ parent }) => parent.linkType !== 'internal'
@@ -118,10 +120,6 @@ export default {
                 title: 'External URL',
                 name: 'url',
                 type: 'url',
-                validation: Rule =>
-                  Rule.uri({
-                    scheme: ['http', 'https', 'mailto', 'tel']
-                  }),
                 hidden: ({ parent }) => parent.linkType !== 'external'
               },
               {

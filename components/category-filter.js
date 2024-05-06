@@ -8,12 +8,12 @@ import Accordion from '@components/accordion'
 import Swatch from '@components/swatch'
 import Icon from '@components/icon'
 
-const CollectionFilter = ({
+const CategoryFilter = ({
   filterGroups,
   activeFilters = [],
   filtersTotal,
   itemTotal,
-  onChange = () => {},
+  onChange,
 }) => {
   const [filtersOpen, setFiltersOpen] = useState(false)
 
@@ -28,7 +28,7 @@ const CollectionFilter = ({
 
   return (
     <>
-      <div className="collection--filter-actions">
+      <div className="category--filter-actions">
         <button onClick={() => setFiltersOpen(true)} className="filters-toggle">
           Show Filters
           {filtersTotal > 0 && (
@@ -227,4 +227,4 @@ const FilterOption = ({ option, activeOptions, onChange }) => {
   )
 }
 
-export default CollectionFilter
+export default CategoryFilter

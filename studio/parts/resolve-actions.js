@@ -1,16 +1,20 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 
-import sanityClient from 'part:@sanity/base/client'
-
 import defaultResolve, {
   PublishAction,
   DiscardChangesAction,
-  DeleteAction,
+  DeleteAction
 } from 'part:@sanity/base/document-actions'
 
 import { useToast } from '@sanity/ui'
-import { EyeOpenIcon, BasketIcon, SyncIcon } from '@sanity/icons'
+
+import { Eye, Storefront } from 'phosphor-react'
+
+const remoteURL = window.location.protocol + '//' + window.location.hostname
+const localURL = 'http://localhost:3000'
+const frontendURL =
+  window.location.hostname === 'localhost' ? localURL : remoteURL
 
 const singletons = [
   'generalSettings',
@@ -19,95 +23,72 @@ const singletons = [
   'headerSettings',
   'footerSettings',
   'shopSettings',
-  'seoSettings',
+  'seoSettings'
 ]
 
-const editAndDelete = ['product', 'productVariant']
+const editAndDelete = ['product']
 
-const previews = ['page', 'product', 'collection']
+const previews = ['page', 'product', 'category']
 
-const PreviewAction = (props) => {
+const PreviewAction = props => {
   const slug = props.draft
-    ? props.draft.slug?.current
-    : props.published?.slug?.current
-
+    ? props.draft.slug
+    : props.published?.slug
   return {
     label: 'Open Preview',
-    icon: EyeOpenIcon,
-    onHandle: async () => {
-      const localURL = 'http://localhost:3000'
-      const remoteURL = await sanityClient.fetch(
-        '*[_type == "generalSettings"][0].siteURL'
-      )
-
-      const frontendURL =
-        window.location.hostname === 'localhost' ? localURL : remoteURL
-
+    icon: () => <Eye weight="light" data-sanity-icon="eye" />,
+    onHandle: () => {
       window.open(
-        `${frontendURL}/api/preview?token=HULL&type=${props.type}&slug=${
-          slug || ''
-        }`
+        `${frontendURL}/api/preview?token=HULL&type=${props.type}&slug=${slug ||
+          ''}`
       )
-    },
+    }
   }
 }
 
-const ShopifyAction = ({ draft, published }) => {
+const CommerceAction = props => {
   const [isSyncing, setIsSyncing] = useState(false)
 
   const toast = useToast()
 
   return {
-    label: isSyncing ? 'Syncing...' : 'Sync images to Shopify',
-    icon: isSyncing ? SyncIcon : BasketIcon,
-    disabled: draft || !published?.productID,
-    title: draft ? 'Must be published first' : null,
-    onHandle: async () => {
+    disabled: !props.published?.productID,
+    label: isSyncing ? 'Syncing...' : 'Sync images to Commerce',
+    icon: () => <Storefront weight="light" data-sanity-icon="storefront" />,
+    onHandle: () => {
       setIsSyncing(true)
 
-      toast.push({
-        title: 'Beginning Sync...',
-      })
-
-      const localURL = 'http://localhost:3000'
-      const remoteURL = await sanityClient.fetch(
-        '*[_type == "generalSettings"][0].siteURL'
-      )
-      const frontendURL =
-        window.location.hostname === 'localhost' ? localURL : remoteURL
-
       axios({
-        url: `${frontendURL}/api/shopify/product-images`,
+        url: `${frontendURL}/api/commerce/product-images`,
         method: 'POST',
-        data: published,
+        data: props.published
       })
-        .then((res) => res.data)
-        .then((res) => {
+        .then(res => res.data)
+        .then(res => {
           setIsSyncing(false)
 
           if (res.error) {
             toast.push({
               status: 'error',
-              title: 'Error',
-              description: res.error,
+              description: res.error
             })
           } else {
             toast.push({
               status: 'success',
-              title: 'Photos sync’d to Shopify successfully!',
+              description: 'Photos sync’d successfully!'
             })
           }
         })
-        .catch((err) => {
+        .catch(err => {
           setIsSyncing(false)
+          console.log(err)
 
           toast.push({
             status: 'error',
-            title: 'Error!',
-            description: 'An unknown error occurred',
+            description: 'There was an error.'
           })
         })
-    },
+    }
   }
 }
 
@@ -121,7 +102,7 @@ export default function resolveDocumentActions(props) {
     return [
       PublishAction,
       DiscardChangesAction,
-      ...(canPreview ? [PreviewAction] : []),
+      ...(canPreview ? [PreviewAction] : [])
     ]
   }
 
@@ -131,7 +112,7 @@ export default function resolveDocumentActions(props) {
       DiscardChangesAction,
       DeleteAction,
       ...(canPreview ? [PreviewAction] : []),
-      ...(isProduct ? [ShopifyAction] : []),
+      ...(isProduct ? [CommerceAction] : [])
     ]
   }
 

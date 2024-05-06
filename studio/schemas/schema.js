@@ -3,10 +3,9 @@ import schemaTypes from 'all:part:@sanity/base/schema-type'
 
 // Document types
 import page from './documents/page'
-import section from './documents/section'
-import product from './documents/shop-product'
-import productVariant from './documents/shop-variant'
-import collection from './documents/shop-collection'
+import product from './documents/commerce-product'
+import productVariant from './documents/commerce-variant'
+import category from './documents/commerce-category'
 import filter from './documents/filter'
 import solidColor from './documents/color'
 
@@ -27,9 +26,12 @@ import marquee from './modules/marquee'
 import dividerPhoto from './modules/divider-photo'
 import newsletter from './modules/newsletter'
 import productHero from './modules/product-hero'
-import collectionGrid from './modules/collection-grid'
+import categoryGrid from './modules/category-grid'
 
 // Object types
+import price from './objects/commerce-product-price'
+import commerceSeo from './objects/commerce-product-seo';
+
 import gridColumn from './objects/grid-column'
 import gridSize from './objects/grid-size'
 import seo from './objects/seo'
@@ -71,10 +73,9 @@ export default createSchema({
     /* ----------------- */
     /* 1: Document types */
     page,
-    section,
     product,
     productVariant,
-    collection,
+    category,
     filter,
     solidColor,
 
@@ -96,10 +97,13 @@ export default createSchema({
     dividerPhoto,
     newsletter,
     productHero,
-    collectionGrid,
+    categoryGrid,
 
     /* ----------------------- */
-    /* 3: Generic Object types */
+    /* 3: Generic & Commerce Object types */
+    price,
+    commerceSeo,
+
     gridColumn,
     gridSize,
     seo,

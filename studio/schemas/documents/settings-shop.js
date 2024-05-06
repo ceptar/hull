@@ -1,25 +1,26 @@
 import React from 'react'
 
 export default {
-  title: 'Shop Settings',
+  title: 'Shop settings',
   name: 'shopSettings',
   type: 'document',
+  // __experimental_actions: ['update', 'publish'], // disable for initial publish
   fields: [
     {
-      title: 'Shopify Store URL',
+      title: 'Chec store URL',
       name: 'storeURL',
       type: 'url',
       description: (
         <>
           The{' '}
           <a
-            href="https://help.shopify.com/en/manual/online-store/domains"
+            href="https://dashboard.chec.io/settings/merchant"
             target="_blank"
             rel="noopener noreferrer"
           >
             custom domain or subdomain
           </a>{' '}
-          connected to your Shopify store
+          connected to your Chec hosted checkout store
         </>
       ),
       validation: Rule =>
@@ -28,11 +29,11 @@ export default {
         })
     },
     {
-      title: 'Collection Pagination Limit',
+      title: 'Category pagination limit',
       name: 'paginationLimit',
       type: 'number',
       description:
-        'The number of products to show in a collection to show/load at a time',
+        'The number of products to show in a category to show/load at a time',
       validation: Rule =>
         Rule.integer()
           .positive()
@@ -54,7 +55,7 @@ export default {
       title: 'Empty Filter Results',
       name: 'noFilterResults',
       type: 'complexPortableText',
-      description: 'Display text when a filtered collection is empty'
+      description: 'Display text when a filtered category is empty'
     },
     {
       title: 'Cart Message',

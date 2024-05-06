@@ -1,21 +1,6 @@
 import React from 'react'
 import { Circle } from 'phosphor-react'
 
-export const getModuleName = type => {
-  switch (type) {
-    case 'grid':
-      return 'Content Grid'
-    case 'hero':
-      return 'Hero'
-    case 'marquee':
-      return 'Marquee'
-    case 'dividerPhoto':
-      return 'Divider Photo'
-    default:
-      return null
-  }
-}
-
 export const getTypeTitles = types => {
   const typeNames = types.map(type => {
     switch (type) {
@@ -64,7 +49,7 @@ export const getStaticRoute = name => {
 
 export const getDynamicRoute = name => {
   switch (name) {
-    case 'collection':
+    case 'category':
       return 'shop'
     case 'product':
       return 'products'
@@ -86,26 +71,15 @@ export const getSwatch = color => {
   )
 }
 
-// replace template tags with values
-export function replaceTemplateTags(string, templateTags = []) {
-  let newString = string
-
-  templateTags.map(v => {
-    newString = newString?.replace(new RegExp(v.tag, 'g'), v.value)
-  })
-
-  return newString
-}
-
-export const assemblePageUrl = ({ document, domain }) => {
+export const assemblePageUrl = ({ document, options }) => {
   const { slug } = document
-
-  if (!domain) {
-    console.warn('Missing domain', { slug, domain })
+  const { previewURL } = options
+  if (!previewURL) {
+    console.warn('Missing preview URL', { slug, previewURL })
     return ''
   }
 
-  return domain + (slug ? `/${slug.current}` : '')
+  return previewURL + (slug ? `/${slug}` : '')
 }
 
 export const decodeAssetUrl = id => {
@@ -120,16 +94,5 @@ export const decodeAssetUrl = id => {
     assetId,
     dimensions: { width, height },
     format
-  }
-}
-
-export const excludeCurrentReferences = ({ parent }) => {
-  const addedRefs = parent?.map(ref => ref._ref).filter(Boolean)
-
-  return {
-    filter: '!(_id in $ids)',
-    params: {
-      ids: addedRefs
-    }
   }
 }

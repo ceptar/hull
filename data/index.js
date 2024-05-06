@@ -4,7 +4,7 @@ import * as queries from './queries'
 // Fetch all dynamic docs
 export async function getAllDocSlugs(doc) {
   const data = await getSanityClient().fetch(
-    `*[_type == "${doc}" && !(_id in [${queries.homeID}, ${queries.shopID}, ${queries.errorID}]) && wasDeleted != true && isDraft != true]{ "slug": slug.current }`
+    `*[_type == "${doc}" && !(_id in [${queries.homeID}, ${queries.shopID}, ${queries.errorID}]) && wasDeleted != true && isDraft != true]{ slug }`
   )
   return data
 }
@@ -33,27 +33,23 @@ export async function getStaticPage(pageData, preview) {
 
 // Fetch a specific dynamic page with our global data
 export async function getPage(slug, preview) {
-  const slugs = JSON.stringify([slug, `/${slug}`, `/${slug}/`])
+  const slugs = [`/${slug}`, slug, `/${slug}/`]
 
   const query = `
     {
-      "page": *[_type == "page" && slug.current in ${slugs}] | order(_updatedAt desc)[0]{
-        "id": _id,
+      "page": *[_type == "page" && slug in ${JSON.stringify(
+    slugs
+  )}] | order(_updatedAt desc)[0]{
         hasTransparentHeader,
         modules[]{
-          defined(_ref) => { ...@->content[0] {
-            ${queries.modules}
-          }},
-          !defined(_ref) => {
-            ${queries.modules},
-          }
+          ${queries.modules}
         },
         title,
         seo
       },
       ${queries.site}
     }
-  `
+    `
 
   const data = await getSanityClient(preview).fetch(query)
 
@@ -64,16 +60,10 @@ export async function getPage(slug, preview) {
 export async function getProduct(slug, preview) {
   const query = `
     {
-      "page": *[_type == "product" && slug.current == "${slug}" && wasDeleted != true && isDraft != true] | order(_updatedAt desc)[0]{
-        "id": _id,
+      "page": *[_type == "product" && slug == "${slug}" && wasDeleted != true && isDraft != true] | order(_updatedAt desc)[0]{
         hasTransparentHeader,
         modules[]{
-          defined(_ref) => { ...@->content[0] {
-            ${queries.modules}
-          }},
-          !defined(_ref) => {
-            ${queries.modules},
-          }
+          ${queries.modules}
         },
         "product": ${queries.product},
         title,
@@ -88,22 +78,18 @@ export async function getProduct(slug, preview) {
   return data
 }
 
-// Fetch a specific collection with our global data
-export async function getCollection(slug, preview) {
+// Fetch a specific category with our global data
+export async function getCategory(slug, preview) {
   const query = `
     {
-      "page": *[_type == "collection" && slug.current == "${slug}"] | order(_updatedAt desc)[0]{
-        "id": _id,
+      "page": *[_type == "category" && slug == "${slug}"] | order(_updatedAt desc)[0]{
         hasTransparentHeader,
         modules[]{
-          defined(_ref) => { ...@->content[0] {
-            ${queries.modules}
-          }},
-          !defined(_ref) => {
-            ${queries.modules},
-          }
+          ${queries.modules}
         },
-        products[wasDeleted != true && isDraft != true]->${queries.product},
+        products[wasDeleted != true && isDraft != true${
+    preview?.active ? ' && _id in path("drafts.**")' : ''
+  }]->${queries.product},
         title,
         seo
       },

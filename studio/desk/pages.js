@@ -79,7 +79,7 @@ const currentShopPage = S.listItem()
       return S.component(() => (
         <EmptyNotice
           title="Shop Page"
-          type="collection"
+          type="category"
           link="settings;general"
           linkTitle="General Settings"
         />
@@ -87,7 +87,7 @@ const currentShopPage = S.listItem()
 
     return S.document()
       .id(data.shop._id)
-      .schemaType('collection')
+      .schemaType('category')
       .views(standardViews)
   })
 
@@ -145,28 +145,6 @@ export const pagesMenu = S.listItem()
                   .documentId(documentId)
                   .schemaType('page')
                   .views(standardViews)
-              )
-              .canHandleIntent(
-                (intent, { type }) =>
-                  ['create', 'edit'].includes(intent) && type === 'page'
-              )
-          ),
-        S.divider(),
-        S.listItem()
-          .title('Reusable Sections')
-          .schemaType('section')
-          .child(
-            S.documentTypeList('section')
-              .title('Reusable Sections')
-              .child(documentId =>
-                S.document()
-                  .documentId(documentId)
-                  .schemaType('section')
-                  .views(standardViews)
-              )
-              .canHandleIntent(
-                (intent, { type }) =>
-                  ['create', 'edit'].includes(intent) && type === 'section'
               )
           )
       ])

@@ -10,58 +10,38 @@ const DynamicSelect = React.forwardRef((props, ref) => {
 
   let dynamicOptions = []
 
-  // are we joining from a subfield?
-  if (options.joinWith) {
+  // are we mapping a subfield?
+  if (options.fromSubField) {
     /*  ------------------------------------------------------------ */
-    /*  1. Map over the main array field (from)
-    /*  2. Map over the subfield (joinWith)
+    /*  1. Grab the other array field from document (fromField)
+    /*  2. Map over the specified subfield string list (fromSubField)
     /*  3. build our array object
-    /*    - Use the main array field title (fromData -> title)
-    /*    - store that with the subfield value (joinWith), 
-    /*      or the subfield title and value (joinWith -> title)
+    /*    - reference a field from the main array (fromFieldData)
+    /*    - store that with the subfield value (title:value)
     /*  ------------------------------------------------------------ */
-
-    // bail if we can't find the from field
-    if (!(options.from in document)) return null
-
-    dynamicOptions = document[options.from]
-      .map(opt => {
+    dynamicOptions = document[options.fromField]?.map(opt => {
+        debugger;
         // bail if we can't find the subfield
-        if (!(options.joinWith in opt)) return null
+        if (!(options.fromSubField in opt)) return null
 
-        // if a subfield is a complex array
-        if (options.joinWithData) {
-          return opt[options.joinWith].map(jOpt => {
-            return {
-              title: `${opt[options.fromData.title]} - ${
-                jOpt[options.joinWithData.title]
-              }`,
-              value: `${opt[options.fromData.title]}:${
-                jOpt[options.joinWithData.value]
-              }`
-            }
-          })
-        } else {
-          return opt[options.joinWith].map(val => {
-            return {
-              title: `${opt[options.fromData.title]} - ${val}`,
-              value: `${opt[options.fromData.title]}:${val}`
-            }
-          })
-        }
+        // map over the subfield to build our list of options
+        return opt[options.fromSubField].map(val => ({
+          title: `${opt[options.fromFieldData.title]} - ${val}`,
+          value: `${opt[options.fromFieldData.title]}:${val}`
+        }))
       })
       .flat(1)
-      .filter(x => x !== null)
+      .filter(x => x != null)
 
     // Map basic field array data
   } else {
-    // bail if we can't find the from field
-    if (!(options.from in document)) return null
+    // bail if we can't find the field
+    if (!(options.fromField in document)) return null
 
     // map over the field to build our list of options
-    dynamicOptions = document[options.from].map(opt => ({
-      title: opt[options.fromData.title].toString(),
-      value: opt[options.fromData.value].toString()
+    dynamicOptions = document[options.fromField].map(opt => ({
+      title: opt[options.fromFieldData.title].toString(),
+      value: opt[options.fromFieldData.value]
     }))
   }
 

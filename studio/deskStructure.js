@@ -8,10 +8,9 @@ import { menusMenu } from './desk/menus'
 const hiddenDocTypes = listItem =>
   ![
     'page',
-    'section',
     'product',
     'productVariant',
-    'collection',
+    'category',
     'filter',
     'solidColor',
 
@@ -25,8 +24,7 @@ const hiddenDocTypes = listItem =>
 
     'menu',
     'siteSettings',
-    'redirect',
-    'media.tag' // for media plugin
+    'redirect'
   ].includes(listItem.getId())
 
 export default () =>

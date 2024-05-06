@@ -1,30 +1,26 @@
 import S from '@sanity/desk-tool/structure-builder'
 import sanityClient from 'part:@sanity/base/client'
 
-import { Copy, Gift, Sliders, ShoppingCart, LinkBreak } from 'phosphor-react'
+import { Copy, Gift, Sliders, ShoppingCart } from 'phosphor-react'
 
 import { standardViews } from './previews/standard'
 
-const collectionsMenu = S.listItem()
-  .title('Collections')
-  .schemaType('collection')
+const categoriesMenu = S.listItem()
+  .title('Categories')
+  .schemaType('category')
   .child(
-    S.documentTypeList('collection')
-      .title('Collections')
+    S.documentTypeList('category')
+      .title('Categories')
       .filter(
-        `_type == "collection" && !(_id in [
+        `_type == "category" && !(_id in [
       *[_type == "generalSettings"][0].shop._ref,
     ]) && !(_id in path("drafts.**"))`
       )
       .child(documentId =>
         S.document()
           .documentId(documentId)
-          .schemaType('collection')
+          .schemaType('category')
           .views(standardViews)
-      )
-      .canHandleIntent(
-        (intent, { type }) =>
-          ['create', 'edit'].includes(intent) && type === 'collection'
       )
   )
 
@@ -79,7 +75,7 @@ const productVariantsMenu = S.listItem()
           ),
         S.listItem()
           .title('Unattached Variants')
-          .icon(LinkBreak)
+          .icon(Copy)
           .child(async () => {
             const productIDs = await sanityClient.fetch(`
           *[_type == "product"][].productID
@@ -107,10 +103,6 @@ const filtersMenu = S.listItem()
           .documentId(documentId)
           .schemaType('filter')
       )
-      .canHandleIntent(
-        (intent, { type }) =>
-          ['create', 'edit'].includes(intent) && type === 'filter'
-      )
   )
 
 // Our exported "Shop" Menu
@@ -124,7 +116,7 @@ export const shopMenu = S.listItem()
         productsMenu,
         productVariantsMenu,
         S.divider(),
-        collectionsMenu,
+        categoriesMenu,
         filtersMenu
       ])
   )

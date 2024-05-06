@@ -1,117 +1,55 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/router'
-import axios from 'axios'
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import useSWR from 'swr'
+import axios from 'axios';
 
-import { getProduct, getAllDocSlugs } from '@data'
-
-import { useParams, usePrevious, centsToPrice, hasObject } from '@lib/helpers'
+import { getProduct, getAllDocSlugs } from '@data';
 
 import { useSiteContext } from '@lib/context'
 
-import NotFoundPage from '@pages/404'
-import Layout from '@components/layout'
-import { Module } from '@components/modules'
+import NotFoundPage from '@pages/404';
+import Layout from '@components/layout';
+import { Module } from '@components/modules';
 
 // setup our inventory fetcher
 const fetchInventory = (url, id) =>
-  axios
-    .get(url, {
+  axios.get(url, {
       params: {
         id: id,
       },
-    })
-    .then((res) => res.data)
+    }).then((res) => res.data);
 
 const Product = ({ data }) => {
-  const router = useRouter()
+  const router = useRouter();
   const { isPageTransition } = useSiteContext()
 
+  // Return NotFoundPage if no product is found
   if (!router.isFallback && !data) {
-    return <NotFoundPage statusCode={404} />
+    return <NotFoundPage statucsCode={404} />;
   }
 
-  // extract our data
-  const { site, page } = data
+  // Extract site and page from the product data
+  const { site, page } = data;
 
-  // set our Product state
-  const [product, setProduct] = useState(page.product)
+  // Set the product state
+  const [product, setProduct] = useState(page.product);
 
-  // find the default variant for this product by matching against the first product option
-  const defaultVariant = page.product.variants?.find((v) => {
-    const option = {
-      name: page.product.options?.[0]?.name,
-      value: page.product.options?.[0]?.values[0],
-      position: page.product.options?.[0]?.position,
-    }
-    return hasObject(v.options, option)
-  })
-
-  const defaultVariantID = defaultVariant?.id ?? page.product.variants[0].id
-
-  // set up our variant URL params
-  const [currentParams, setCurrentParams] = useParams([
-    {
-      name: 'variant',
-      value: defaultVariantID,
-    },
-  ])
-  const previousParams = usePrevious(currentParams)
-
-  // determine which params set to use
-  const activeParams =
-    isPageTransition && previousParams ? previousParams : currentParams
-
-  // find our activeVariantID ID
-  const paramVariantID = activeParams.find(
-    (filter) => filter.name === 'variant'
-  ).value
-  const foundVariant = page.product.variants?.find(
-    (v) => v.id == paramVariantID
-  )
-  const activeVariantID = foundVariant ? paramVariantID : defaultVariantID
-
-  // handle variant change
-  const updateVariant = useCallback(
-    (id) => {
-      const isValidVariant = page.product.variants.find((v) => v.id == id)
-
-      setCurrentParams([
-        ...activeParams,
-        {
-          name: 'variant',
-          value: isValidVariant ? `${id}` : defaultVariantID,
-        },
-      ])
-    },
-    [activeParams]
-  )
-
-  // check our product inventory is still correct
+  // Check our product inventory
   const { data: productInventory } = useSWR(
-    ['/api/shopify/product-inventory', page.product.id],
-    ([url, id]) => fetchInventory(url, id),
-    { errorRetryCount: 3 }
-  )
+    [`/api/commerce/product-inventory`, page.product.id],
+    (url, id) => fetchInventory(url, id),
+    { errorRetryCount: 3 },
+  );
 
-  // rehydrate our product after inventory is fetched
   useEffect(() => {
     if (page.product && productInventory) {
       setProduct({
         ...page.product,
         inStock: productInventory.inStock,
         lowStock: productInventory.lowStock,
-        variants: [
-          ...page.product.variants.map((v) => {
-            const newInventory = productInventory.variants.find(
-              (nv) => nv.id === v.id
-            )
-            return newInventory ? { ...v, ...newInventory } : v
-          }),
-        ],
       })
     }
-  }, [page.product, productInventory])
+  }, [page.product, productInventory]);
 
   return (
     <>
@@ -119,85 +57,66 @@ const Product = ({ data }) => {
         <Layout
           site={site}
           page={page}
-          schema={getProductSchema(product, activeVariantID, site)}
+          schema={getProductSchema(product, site)}
         >
-          {page.modules?.map((module, key) => (
+          {page.modules.map((module, key) => (
             <Module
               key={key}
               index={key}
-              data={module}
+              module={module}
               product={product}
-              activeVariant={product.variants.find(
-                (v) => v.id == activeVariantID
-              )}
-              onVariantChange={updateVariant}
             />
           ))}
         </Layout>
       )}
     </>
-  )
+  );
 }
 
-function getProductSchema(product, activeVariantID, site) {
-  if (!product) return null
 
-  const router = useRouter()
-  const { query } = router
-
-  const variant = product.variants.find((v) => v.id == activeVariantID)
-
-  return {
+const getProductSchema = (product) => {
+  const schema = {
     '@context': 'http://schema.org',
     '@type': 'Product',
     name: product.title,
-    price: centsToPrice(query.variant ? variant.price : product.price),
-    sku: query.variant ? variant.sku : product.sku,
-    offers: {
-      '@type': 'Offer',
-      url: `${site.rootDomain}/products/${product.slug}${
-        query.variant ? `?variant=${variant.id}` : ''
-      }`,
-      availability: query.variant
-        ? `http://schema.org/${variant.inStock ? 'InStock' : 'SoldOut'}`
-        : `http://schema.org/${product.inStock ? 'InStock' : 'SoldOut'}`,
-      price: centsToPrice(query.variant ? variant.price : product.price),
-      priceCurrency: 'USD',
-    },
-    brand: {
-      '@type': 'Brand',
-      name: site.title,
-    },
+    price: product.price,
+    sku: product.sku,
+    description: product.description,
   }
+
+  if (!product) {
+    return null;
+  }
+
+  return schema;
 }
 
 export async function getStaticProps({ params, preview, previewData }) {
   const productData = await getProduct(params.slug, {
     active: preview,
     token: previewData?.token,
-  })
+  });
 
   return {
     props: {
-      data: productData,
-    },
+      data: productData
+    }
   }
 }
 
+// Fetch all product document slugs
 export async function getStaticPaths() {
-  const allProducts = await getAllDocSlugs('product')
-
+  const allProducts = await getAllDocSlugs('product');
   return {
-    paths:
-      allProducts?.map((page) => {
-        return {
-          params: {
-            slug: page.slug,
-          },
-        }
-      }) || [],
+    paths: allProducts.map((page) => {
+      return {
+        params: {
+          slug: page.slug,
+        },
+      }
+    }) || [],
     fallback: false,
   }
 }
 
-export default Product
+export default Product;

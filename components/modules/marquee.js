@@ -1,9 +1,9 @@
 import React from 'react'
-import { useInView } from 'react-cool-inview'
+import useInView from 'react-cool-inview'
 import { Marqy } from 'marqy'
 
 import Photo from '@components/photo'
-import ProductCard from '@components/product-card'
+import ProductCard from '@components/product-card';
 
 const Marquee = ({ data = {} }) => {
   const { items, speed, reverse, pausable } = data

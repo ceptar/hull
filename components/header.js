@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { m } from 'framer-motion'
 import FocusTrap from 'focus-trap-react'
-import { useInView } from 'react-cool-inview'
+import { useIntersection } from 'use-intersection'
 import { useRect } from '@reach/rect'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
@@ -9,12 +9,7 @@ import cx from 'classnames'
 
 import { isBrowser } from '@lib/helpers'
 
-import {
-  useSiteContext,
-  useToggleMegaNav,
-  useToggleCart,
-  useCartCount,
-} from '@lib/context'
+import { useSiteContext, useToggleMegaNav } from '@lib/context'
 
 import PromoBar from '@components/promo-bar'
 import Menu from '@components/menu'
@@ -29,12 +24,13 @@ const Header = ({ data = {}, isTransparent, onSetup = () => {} }) => {
     menuDesktopRight,
     menuMobilePrimary,
     menuMobileSecondary,
-  } = data
+  } = data || {};
 
   // setup states
   const [isMobileNavOpen, setMobileNavOpen] = useState(false)
   const [headerHeight, setHeaderHeight] = useState(null)
-  const { observe, inView: observerIsVisible } = useInView()
+  const observerRef = useRef()
+  const observerIsVisible = useIntersection(observerRef)
   const headerRef = useRef()
   const headerRect = useRect(headerRef)
   const router = useRouter()
@@ -87,12 +83,12 @@ const Header = ({ data = {}, isTransparent, onSetup = () => {} }) => {
                     aria-label="Go Home"
                     onClick={() => window.scrollTo(0, 0)}
                   >
-                    <Icon name="Logo" id="header" viewBox="0 0 215 150" />
+                    <Icon name="Logo" id="header" viewBox="0 0 275 74" />
                   </button>
                 ) : (
                   <Link href="/" scroll={false}>
                     <a className="logo--link" aria-label="Go Home">
-                      <Icon name="Logo" id="header" viewBox="0 0 215 150" />
+                      <Icon name="Logo" id="header" viewBox="0 0 275 74" />
                     </a>
                   </Link>
                 )}
@@ -159,8 +155,6 @@ const Header = ({ data = {}, isTransparent, onSetup = () => {} }) => {
                       />
                     </div>
                   </FocusTrap>
-
-                  <CartToggle />
                 </div>
 
                 {/* Desktop Header Menu */}
@@ -183,8 +177,6 @@ const Header = ({ data = {}, isTransparent, onSetup = () => {} }) => {
                         useMegaNav
                       />
                     )}
-
-                    <CartToggle />
                   </div>
                 </div>
               </nav>
@@ -209,26 +201,8 @@ const Header = ({ data = {}, isTransparent, onSetup = () => {} }) => {
         </div>
       </header>
 
-      <span ref={observe} className="header--observer" />
+      <span ref={observerRef} className="header--observer" />
     </>
-  )
-}
-
-const CartToggle = () => {
-  const toggleCart = useToggleCart()
-  const cartCount = useCartCount()
-
-  return (
-    <button className="cart-toggle" onClick={() => toggleCart()}>
-      Cart
-      <span
-        className={cx('cart-toggle--count', {
-          'is-active': cartCount > 0,
-        })}
-      >
-        {cartCount}
-      </span>
-    </button>
   )
 }
 

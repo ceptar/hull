@@ -13,7 +13,7 @@ export const errorID = `*[_type=="generalSettings"][0].error->_id`
 // Construct our "page" GROQ
 const page = `
   "type": _type,
-  "slug": slug.current,
+  slug,
   "isHome": _id == ${homeID},
   "isShop": _id == ${shopID}
 `
@@ -65,14 +65,12 @@ export const ptContent = `
 export const product = `
   {
     "publishDate": coalesce(publishDate, _createdAt),
-    "slug": slug.current,
+    slug,
     "id": productID,
     title,
     price,
     comparePrice,
-    description[]{
-      ${ptContent}
-    },
+    description,
     "photos": {
       "main": galleryPhotos[]{
         forOption,
@@ -119,7 +117,7 @@ export const product = `
     },
     "klaviyoAccountID": *[_type == "generalSettings"][0].klaviyoAccountID,
     "filters": filters[]{
-      "slug": filter->slug.current,
+      "slug": filter->slug,
       forOption
     }
   }
@@ -229,7 +227,7 @@ export const modules = `
     _type,
     _key,
   },
-  _type == 'collectionGrid' => {
+  _type == 'categoryGrid' => {
     _type,
     _key,
     "title": ^.title,
@@ -239,12 +237,12 @@ export const modules = `
       groups[]{
         "id": _key,
         title,
-        "slug": slug.current,
+        slug,
         display,
         options[]->{
           type,
           title,
-          "slug": slug.current,
+          slug,
           "color": color->color
         }
       }
@@ -273,14 +271,14 @@ export const site = `
       storeURL,
       cartMessage
     },
-    "productCounts": [ {"slug": "all", "count": count(*[_type == "product"])} ] + *[_type == "collection"]{
-      "slug": slug.current,
+    "productCounts": [ {"slug": "all", "count": count(*[_type == "product"])} ] + *[_type == "category"]{
+      slug,
       "count": count(products)
     },
     "cookieConsent": *[_type == "cookieSettings"][0]{
       enabled,
       message,
-      "link": link->{"type": _type, "slug": slug.current}
+      "link": link->{"type": _type, slug}
     },
     "header": *[_type == "headerSettings"][0]{
       "promo": *[_type == "promoSettings"][0]{
@@ -344,7 +342,7 @@ export const site = `
               ${ptContent}
             }
           }
-        },
+        }
         {
           "title": blockTitle2,
           "menu": blockMenu2->{
@@ -385,6 +383,8 @@ export const site = `
 `
 
 // All Products
-export const allProducts = `
-  *[_type == "product" && wasDeleted != true && isDraft != true]${product} | order(title asc)
+export const allProducts = (preview) => `
+  *[_type == "product" && wasDeleted != true && isDraft != true${
+  preview?.active ? ' && _id in path("drafts.**")' : ''
+}]${product} | order(title asc)
 `

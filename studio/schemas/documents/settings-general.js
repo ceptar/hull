@@ -4,31 +4,25 @@ export default {
   title: 'General Settings',
   name: 'generalSettings',
   type: 'document',
-  groups: [
-    { title: 'Site Details', name: 'details', default: true },
-    { title: 'Displays', name: 'displays' },
-    { title: 'Advanced', name: 'advanced' }
-  ],
+  // __experimental_actions: ['update', 'publish'], // disable for initial publish
   fields: [
     {
       title: 'Home Page',
       name: 'home',
       type: 'reference',
       to: [{ type: 'page' }],
-      description: 'This page will show at the root of your domain',
-      group: 'displays'
+      description: 'This page will show at the root of your domain'
     },
     {
       title: 'Shop Page',
       name: 'shop',
       type: 'reference',
-      to: [{ type: 'collection' }],
+      to: [{ type: 'category' }],
       description: (
         <>
-          This collection will show at: <code>/shop</code>
+          This category will show at: <code>/shop</code>
         </>
-      ),
-      group: 'displays'
+      )
     },
     {
       title: 'Error Page (404)',
@@ -36,37 +30,31 @@ export default {
       type: 'reference',
       to: [{ type: 'page' }],
       description:
-        'This page will show for any URL at your domain that does not exist yet',
-      group: 'displays'
+        'This page will show for any URL at your domain that does not exist yet'
     },
     {
       title: 'Site Title',
       name: 'siteTitle',
       type: 'string',
-      description: 'The name of your site, usually your company/brand name',
-      group: 'details'
+      description: 'The name of your site, usually your company/brand name'
     },
     {
       title: 'Live Site URL',
       description: 'The root domain or subdomain of your website',
       name: 'siteURL',
-      type: 'url',
-      validation: Rule => Rule.required(),
-      group: 'details'
+      type: 'url'
     },
     {
       title: 'Google Tag Manager (GTM)',
       description: 'To enable GTM enter your Container ID',
       name: 'gtmID',
-      type: 'string',
-      group: 'advanced'
+      type: 'string'
     },
     {
       title: 'Klaviyo Site ID (Public API Key)',
-      description: 'For product waitlists and newsletter forms',
+      description: 'For product waitlist and newsletter forms',
       name: 'klaviyoAccountID',
-      type: 'string',
-      group: 'advanced'
+      type: 'string'
     }
   ],
   preview: {

@@ -2,9 +2,9 @@ import React from 'react'
 
 import Listbox from '@components/listbox'
 
-const CollectionSort = ({ sortOptions, activeSort, onChange }) => {
+const CategorySort = ({ sortOptions, activeSort, onChange }) => {
   return (
-    <div className="collection-sort is-right">
+    <div className="category-sort is-right">
       <Listbox
         id="collection-sort"
         label="Select sorting order"
@@ -14,8 +14,8 @@ const CollectionSort = ({ sortOptions, activeSort, onChange }) => {
         onChange={onChange}
         before={
           <>
-            <span className="collection-sort--icon"></span>
-            <span className="collection-sort--title">Sort:</span>
+            <span className="category-sort--icon" />
+            <span className="category-sort--title">Sort:</span>
           </>
         }
       />
@@ -23,4 +23,4 @@ const CollectionSort = ({ sortOptions, activeSort, onChange }) => {
   )
 }
 
-export default CollectionSort
+export default CategorySort

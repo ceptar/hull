@@ -7,17 +7,22 @@
   }
   
   &--bg {
-    @apply relative w-full  h-full;
+    @apply relative w-full h-full;
     grid-area: 1/-1;
 
     &.is-desktop {
       @apply hidden sm:block;
-    }
+    
+    &--photo {
+      @apply hidden sm:block object-right ;
 
+    }}
+  
     &.is-mobile {
       @apply sm:hidden;
     }
   }
+  
 
   &--overlay {
     @apply z-2 flex flex-col justify-center;

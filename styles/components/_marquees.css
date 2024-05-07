@@ -72,33 +72,20 @@
   }
 
   &--text {
-    @apply block p-32 text-48 leading-100;
+    @apply block p-8 text-5xl leading-none;
   }
 
   &--photo {
-    @apply relative w-120 sm:w-200 px-32 py-16 sm:px-48 sm:py-32;
+    @apply relative w-32 sm:w-48 px-8 py-4 sm:px-12 sm:py-8;
 
     [data-theme='metal'] & {
-      filter: invert(43%) sepia(83%) saturate(3151%) hue-rotate(337deg) brightness(92%) contrast(111%);
+      filter: invert(94%) sepia(59%) saturate(2450%) hue-rotate(35deg) brightness(122%) contrast(111%);
     }
 
     img {
       html:not([data-theme='dark']) & {
         filter: invert(1);
       }
-    }
-  }
-
-  &--product {
-    @apply flex flex-col -my-1 max-w-[450px];
-    width: calc(80vw - 2rem);
-
-    * {
-      @apply whitespace-normal;
-    }
-
-    .product-card {
-      @apply flex-1;
     }
   }
 }

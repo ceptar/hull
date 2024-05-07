@@ -77,7 +77,7 @@ const Newsletter = ({ data = {} }) => {
 
   return (
     <form className="form" onSubmit={handleSubmit(onSubmit)}>
-      <AnimatePresence mode="wait">
+      <AnimatePresence exitBeforeEnter>
         {!error && !success && (
           <m.div
             initial="hide"
@@ -130,7 +130,7 @@ const Newsletter = ({ data = {} }) => {
 
               <button
                 type="submit"
-                className={cx('btn is-text', {
+                className={cx('btn is-primary', {
                   'is-loading': submitting,
                   'is-disabled': terms && !hasAgreed,
                 })}

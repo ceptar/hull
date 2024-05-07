@@ -1,8 +1,6 @@
 import React from 'react'
 import { AnimatePresence, m } from 'framer-motion'
 
-import { hasObject } from '@lib/helpers'
-
 import Photo from '@components/photo'
 
 const thumbAnim = {
@@ -24,26 +22,16 @@ const thumbAnim = {
   },
 }
 
-const ProductThumbnail = ({ thumbnails = [], activeVariant }) => {
-  const { options } = activeVariant
+const ProductThumbnail = ({ thumbnails = [] }) => {
 
-  const defaultThumbnails = thumbnails.find((set) => !set.forOption)
-  const variantThumbnails = thumbnails.find((set) => {
-    const option = set.forOption
-      ? {
-          name: set.forOption.split(':')[0],
-          value: set.forOption.split(':')[1],
-        }
-      : {}
-    return option.value && hasObject(options, option)
-  })
+  const defaultThumbnails = thumbnails?.find((set) => !set.forOption)
 
-  const photos = variantThumbnails ? variantThumbnails : defaultThumbnails
+  const photos = defaultThumbnails
 
   const id = photos?.default?.id + photos?.hover?.id
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence exitBeforeEnter>
       <m.div
         key={id}
         initial="hide"
@@ -54,7 +42,7 @@ const ProductThumbnail = ({ thumbnails = [], activeVariant }) => {
       >
         <Photo
           photo={photos?.default}
-          srcSizes={[400, 800, 1000]}
+          srcsetSizes={[400, 800, 1000]}
           sizes="(min-width: 1200px) 33vw, (min-width: 768px) 50vw, 100vw"
           width={1200}
           className="is-default"
@@ -63,7 +51,7 @@ const ProductThumbnail = ({ thumbnails = [], activeVariant }) => {
         {photos?.hover && (
           <Photo
             photo={photos.hover}
-            srcSizes={[400, 800, 1000]}
+            srcsetSizes={[400, 800, 1000]}
             sizes="(min-width: 1200px) 33vw, (min-width: 768px) 50vw, 100vw"
             width={1200}
             className="is-hover"

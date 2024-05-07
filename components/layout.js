@@ -1,8 +1,8 @@
-import React, { useEffect, useState, memo } from 'react'
+import React, { useEffect, useState } from 'react'
 import Script from 'next/script'
 import { m } from 'framer-motion'
 
-import { isBrowser, isMobileSafari, useWindowSize } from '@lib/helpers'
+import { isBrowser, useWindowSize } from '@lib/helpers'
 import { pageTransitionSpeed } from '@lib/animate'
 
 import HeadSEO from '@components/head-seo'
@@ -10,8 +10,11 @@ import CookieBar from '@components/cookie-bar'
 import Header from '@components/header'
 import Footer from '@components/footer'
 
-const pageTransitionAnim = {
-  show: {
+const variants = {
+  initial: {
+    opacity: 0,
+  },
+  enter: {
     opacity: 1,
     transition: {
       duration: pageTransitionSpeed / 1000,
@@ -20,7 +23,7 @@ const pageTransitionAnim = {
       when: 'beforeChildren',
     },
   },
-  hide: {
+  exit: {
     opacity: 0,
     transition: {
       duration: pageTransitionSpeed / 1000,
@@ -31,20 +34,17 @@ const pageTransitionAnim = {
 }
 
 const Layout = ({ site = {}, page = {}, schema, children }) => {
-  // set window height var (w/ safari/iOS hack)
+  // set window height var
   const { height: windowHeight } = useWindowSize()
-  const [lockHeight, setLockHeight] = useState(false)
-  const hasChin = isMobileSafari()
 
   // set header height
   const [headerHeight, setHeaderHeight] = useState(null)
 
   useEffect(() => {
-    if ((isBrowser && !lockHeight) || !hasChin) {
+    if (isBrowser) {
       document.body.style.setProperty('--vh', `${windowHeight * 0.01}px`)
-      setLockHeight(hasChin)
     }
-  }, [windowHeight, hasChin])
+  }, [windowHeight])
 
   return (
     <>
@@ -64,11 +64,10 @@ const Layout = ({ site = {}, page = {}, schema, children }) => {
       )}
 
       <m.div
-        key={page.id}
-        initial="hide"
-        animate="show"
-        exit="hide"
-        variants={pageTransitionAnim}
+        initial="initial"
+        animate="enter"
+        exit="exit"
+        variants={variants}
         style={headerHeight ? { '--headerHeight': `${headerHeight}px` } : null}
       >
         <CookieBar data={site.cookieConsent} />

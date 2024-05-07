@@ -1,16 +1,16 @@
-.collection {
+.category {
   @apply border-b;
-  
+
   &--tools {
-    @apply sticky top-[var(--headerHeight)] z-2 flex justify-between bg-pageBG border-b;
+    @apply sticky top-[var(--headerHeight)] z-10 flex justify-between bg-pageBG border-b;
   }
 
   &--content {
-    @apply relative z-1 overflow-hidden;
+    @apply relative z-0 overflow-hidden;
   }
-  
+
   &--grid {
-    @apply grid grid-cols-1 md:grid-cols-3 -m-1;
+    @apply grid grid-cols-1 md:grid-cols-3 -m-px;
 
     &.is-empty {
       @apply grid-cols-1;
@@ -18,34 +18,34 @@
   }
 
   &--empty {
-    @apply px-16 py-64 min-h-[35vh] text-center;
+    @apply px-8 py-16 min-h-[35vh] text-center;
 
     .filters-reset {
-      @apply mt-32;
+      @apply mt-8;
     }
   }
 
   &--pagination {
-    @apply relative p-16 sm:py-32 text-center is-textured bg-pageBG border-t;
+    @apply relative p-4 sm:py-8 text-center is-textured bg-pageBG border-t;
   }
 
   &--count {
-    @apply relative p-16 sm:py-32 text-center bg-pageBG border-t;
+    @apply relative p-4 sm:py-8 text-center bg-pageBG border-t;
   }
 
   &--filter-actions {
-    @apply flex items-center px-8 sm:px-16;
+    @apply flex items-center px-2 sm:px-4;
 
     .filters-toggle {
-      @apply clean-btn flex items-center relative p-16 bg-transparent text-14 leading-150 font-semibold uppercase;
+      @apply clean-btn flex items-center relative p-4 bg-transparent text-sm leading-normal font-semibold uppercase;
 
       &--count {
-        @apply w-24 h-24 ml-8 rounded-full bg-pageText text-pageBG text-12 leading-[2];
+        @apply w-6 h-6 ml-2 rounded-full bg-pageText text-pageBG text-xs leading-loose;
       }
     }
 
     .filters-reset {
-      @apply hidden sm:block ml-8;
+      @apply hidden sm:block ml-2;
     }
   }
 
@@ -62,8 +62,8 @@
   }
 }
 
-.collection-count {
-  @apply hidden relative ml-16 leading-100;
+.category-count {
+  @apply hidden relative ml-2 leading-none;
   vertical-align: super;
   font-size: .5em;
 
@@ -73,19 +73,19 @@
   }
 }
 
-.collection-sort {
-  @apply flex ml-auto px-8 sm:px-16;
+.category-sort {
+  @apply flex ml-auto px-2 sm:px-4;
 
   .listbox {
     @apply flex;
 
     &--btn {
-      @apply p-16 text-14 leading-150;
+      @apply p-4 text-sm leading-normal;
     }
   }
 
   &--title {
-    @apply hidden sm:inline mr-8 font-semibold uppercase;
+    @apply hidden sm:inline mr-2 font-semibold uppercase;
   }
 
   &--icon {
@@ -96,24 +96,28 @@
 .product-card {
   @apply flex flex-col relative;
 
-  .collection &,
+  .category &,
   .marquee & {
-    @apply p-32 m-[-0.5px] border;
+    @apply p-8 m-[-0.5px] border;
   }
 
   &.is-inline {
-    @apply my-16;
+    @apply my-4;
   }
 
   &--visuals {
     @apply relative;
   }
-  
+
+  &--thumb {
+    @apply z-0;
+  }
+
   &--photo {
     @apply relative overflow-hidden;
 
     .is-hover {
-      @apply absolute inset-0 z-1 opacity-0 invisible transition-all;
+      @apply absolute inset-0 z-10 opacity-0 invisible transition-all;
 
       .product-card:hover & {
         @apply opacity-100 visible;
@@ -126,7 +130,7 @@
 
     .carousel {
       &--hud {
-        @apply z-3;
+        @apply z-30;
       }
     }
   }
@@ -135,7 +139,7 @@
     @apply text-center;
 
     .product-card--visuals + & {
-      @apply mt-16;
+      @apply mt-4;
     }
   }
 
@@ -143,15 +147,15 @@
     @apply m-0 !important;
 
     .is-featured & {
-      @apply text-16 font-semibold;
+      @apply text-base;
     }
 
     .is-inline & {
-      @apply text-24;
+      @apply text-2xl;
     }
 
     + .price {
-      @apply mt-8;
+      @apply mt-2;
     }
   }
 
@@ -159,13 +163,13 @@
     @apply block no-underline text-current;
 
     &::after {
-      @apply block absolute inset-0 z-2;
+      @apply block absolute inset-0 z-20;
       content: "";
     }
   }
 
   &--option {
-    @apply relative z-3 mt-16;
+    @apply relative z-30 mt-4;
 
     .option {
       @apply m-0 p-0 border-0;
@@ -177,7 +181,7 @@
   }
 
   &--add {
-    @apply absolute bottom-0 inset-x-0 z-3 text-center mx-16 mb-32 opacity-0 invisible translate-y-1/2 transition-all;
+    @apply absolute bottom-0 inset-x-0 z-30 text-center mx-4 mb-8 opacity-0 invisible translate-y-1/2 transition-all;
     will-change: transform;
 
     .product-card:hover & {
@@ -189,11 +193,11 @@
     @apply flex items-center justify-center;
 
     &--current {
-      @apply sm:text-16 sm:leading-150 font-semibold;
+      @apply sm:text-base sm:leading-normal font-semibold;
     }
 
     &--discount {
-      @apply ml-8 px-6 py-4 rounded-md bg-pageText text-pageBG text-10 leading-125 tracking-widest font-semibold uppercase;
+      @apply ml-2 p-1 rounded-sm bg-pageText text-pageBG text-xxs leading-tight tracking-widest font-semibold uppercase;
     }
   }
 }
@@ -202,7 +206,7 @@
   @apply flex flex-col relative;
 
   h2 {
-    @apply mt-4 text-center text-16 font-semibold transition-opacity duration-200;
+    @apply mt-4 text-center text-base font-semibold transition-opacity duration-200;
 
     .product-featured:hover & {
         @apply opacity-100 visible;

@@ -1,20 +1,20 @@
-import React from 'react'
-import Link from 'next/link'
+import React from 'react';
+import Link from 'next/link';
 
-import { hasObject } from '@lib/helpers'
+import { hasObject } from '@lib/helpers';
 
-import { useUpdateItem, useRemoveItem, useToggleCart } from '@lib/context'
+import { useUpdateCartItem, useRemoveCartItem, useToggleCart } from '@lib/context';
 
 import Photo from '@components/photo'
-import { ProductCounter, ProductPrice } from '@components/product'
+import { ProductCounter, ProductPrice } from '@components/product';
 
 function CartItem({ item }) {
-  const removeItem = useRemoveItem()
-  const updateItem = useUpdateItem()
-  const toggleCart = useToggleCart()
+  const removeItem = useRemoveCartItem();
+  const updateItem = useUpdateCartItem();
+  const toggleCart = useToggleCart();
 
   const changeQuantity = (quantity) => {
-    updateItem(item.lineID, quantity)
+    updateItem(item.id, { quantity })
   }
 
   const defaultPhoto = item.photos.cart?.find((set) => !set.forOption)
@@ -35,7 +35,7 @@ function CartItem({ item }) {
       {photos && (
         <Photo
           photo={photos?.default}
-          srcSizes={[400]}
+          srcsetSizes={[400]}
           sizes="(min-width: 768px) 400px, 35vw'"
           className="cart-item--photo"
         />
@@ -43,22 +43,22 @@ function CartItem({ item }) {
       <div className="cart-item--details">
         <div className="cart-item--header">
           <div className="cart-item--title">
-            <div className="cart-item--variant">{item.title}</div>
+            <div className="cart-item--variant">{item.name}</div>
             <h2 className="cart-item--name">
               <Link
-                href={`/products/${item.product.slug}?variant=${item.id}`}
+                href={`/products/${item.permalink}`}
                 scroll={false}
               >
                 <a
                   onClick={() => toggleCart(false)}
                   className="cart-item--link"
                 >
-                  {item.product.title}
+                  {item.name}
                 </a>
               </Link>
             </h2>
           </div>
-          <ProductPrice price={item.price} />
+          <ProductPrice price={item.price.formatted_with_symbol} />
         </div>
         <div className="cart-item--tools">
           <div className="cart-item--quantity">
@@ -71,7 +71,7 @@ function CartItem({ item }) {
             />
           </div>
           <button
-            onClick={() => removeItem(item.lineID)}
+            onClick={() => removeItem(item.id)}
             className="btn is-text"
           >
             Remove

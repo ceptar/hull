@@ -12,13 +12,13 @@ const CategoryPage = ({ data }) => {
     <Layout site={site} page={page}>
       {page.modules?.map((module, key) => (
         <Module
-          key={key}
-          index={key}
-          module={module}
-          collectionProducts={page.products}
-        />
-      ))}
-    </Layout>
+        key={key}
+        index={key}
+        module={module}
+        categoryProducts={page.products}
+      />
+    ))}
+  </Layout>
   )
 }
 

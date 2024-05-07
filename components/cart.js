@@ -3,8 +3,6 @@ import FocusTrap from 'focus-trap-react'
 import { m } from 'framer-motion'
 import cx from 'classnames'
 
-import { centsToPrice } from '@lib/helpers'
-
 import {
   useSiteContext,
   useCartTotals,
@@ -17,19 +15,19 @@ import {
 import CartItem from '@components/cart-item'
 
 const Cart = ({ data }) => {
-  const { shop } = data
+  const { shop } = data;
 
   if (!shop) return null
 
-  const { isCartOpen, isUpdating } = useSiteContext()
-  const { subTotal } = useCartTotals()
-  const cartCount = useCartCount()
-  const lineItems = useCartItems()
-  const checkoutURL = useCheckout()
-  const toggleCart = useToggleCart()
+  const { isCartOpen, isUpdating } = useSiteContext();
+  const { subTotal } = useCartTotals();
+  const cartCount = useCartCount();
+  const lineItems = useCartItems();
+  const checkoutURL = useCheckout();
+  const toggleCart = useToggleCart();
 
-  const [hasFocus, setHasFocus] = useState(false)
-  const [checkoutLink, setCheckoutLink] = useState(checkoutURL)
+  const [hasFocus, setHasFocus] = useState(false);
+  const [checkoutLink, setCheckoutLink] = useState(checkoutURL);
 
   const handleKeyDown = (e) => {
     if (e.which === 27) {
@@ -49,7 +47,7 @@ const Cart = ({ data }) => {
   // update our checkout URL to use our custom domain name
   useEffect(() => {
     if (checkoutURL) {
-      const buildCheckoutLink = shop.storeURL
+      const buildCheckoutLink = shop.storeURL // Add custom URL from Settings > Shop Settings
         ? checkoutURL.replace(
             /^(?:https?:\/\/)?(?:[^@\/\n]+@)?(?:www\.)?([^:\/?\n]+)/g,
             shop.storeURL
@@ -57,7 +55,7 @@ const Cart = ({ data }) => {
         : checkoutURL
       setCheckoutLink(buildCheckoutLink)
     }
-  }, [checkoutURL])
+  }, [checkoutURL]);
 
   return (
     <>

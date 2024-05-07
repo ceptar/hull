@@ -1,14 +1,14 @@
 import React from 'react'
 import cx from 'classnames'
 
-import { useSiteContext, useAddItem } from '@lib/context'
+import { useSiteContext, useAddCartItem } from '@lib/context'
 
 const ProductAdd = ({ productID, quantity = 1, className, children }) => {
-  const addItemToCart = useAddItem()
-  const { shopifyClient, isLoading, isAdding } = useSiteContext()
+  const addItemToCart = useAddCartItem()
+  const { commerceClient, isLoading, isAdding } = useSiteContext()
 
-  // Check that Shopify is connected
-  if (!shopifyClient) {
+  // Check that Commerce is connected
+  if (!commerceClient) {
     return (
       <span className={cx('is-disabled', className)} disabled>
         Unavailable

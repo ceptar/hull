@@ -52,7 +52,6 @@ const HeadSEO = ({ site = {}, page = {}, schema }) => {
         />
       )}
 
-      <link rel="preconnect" href="https://hull-demo.myshopify.com" />
       <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="" />
 
       <title>{metaTitle}</title>
@@ -112,7 +111,7 @@ export default HeadSEO
 
 // replace template tags with values
 function replaceTemplateTags(string, templateTags = []) {
-  let newString = string || '';
+  let newString =  string || '';
 
   templateTags.map((v) => {
     newString = newString.replace(new RegExp(v.tag, 'g'), v.value)

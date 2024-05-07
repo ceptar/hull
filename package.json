@@ -13,7 +13,7 @@
   "sideEffects": false,
   "license": "MIT",
   "engines": {
-    "node": "16.x, 18.x"
+    "node": "18.x"
   },
   "dependencies": {
     "@chec/commerce.js": "^2.8.0",
